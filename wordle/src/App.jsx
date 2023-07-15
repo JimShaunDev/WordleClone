@@ -14,10 +14,12 @@ function App() {
       <nav>
         <h1>Wordle</h1>
       </nav>
-      <AppContext.Provider value={{ board, setBoard }}>
-        <Board />
-        <Keyboard />
-      </AppContext.Provider>
+      <div className="game">
+        <AppContext.Provider value={{ board, setBoard }}>
+          <Board />
+          <Keyboard />
+        </AppContext.Provider>
+      </div>
     </div>
   );
 }
