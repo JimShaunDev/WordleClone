@@ -4,6 +4,7 @@ import Keyboard from "./components/Keyboard";
 import Board from "./components/Board";
 import { boardDefault, generateWordSet } from "./words";
 import { createContext, useEffect } from "react";
+import GameOver from "./components/GameOver";
 
 export const AppContext = createContext();
 
@@ -11,13 +12,20 @@ function App() {
   const [board, setBoard] = useState(boardDefault);
   const [currAttempt, setCurrAttempt] = useState({ attempt: 0, letterPos: 0 });
   const [wordSet, setWordSet] = useState(new Set());
-  const correctWord = "RIGHT";
+  const [disabledLetters, setDisabledLetters] = useState([]);
+  const [gameOver, setGameOver] = useState({
+    gameOver: false,
+    guessedWord: false,
+  });
+  const [correctWord, setCorrectWord] = useState("");
 
   useEffect(() => {
     generateWordSet().then((words) => {
       setWordSet(words.wordSet);
+      console.log(words.wordSet);
+      setCorrectWord(words.todaysWord);
     });
-  });
+  }, []);
 
   const onSelectLetter = (keyVal) => {
     if (currAttempt.letterPos > 4) return;
@@ -35,22 +43,24 @@ function App() {
 
     let currWord = "";
     for (let i = 0; i < 5; i++) {
-      console.log(i);
       currWord += board[currAttempt.attempt][i];
     }
 
-    console.log(currWord.toLowerCase());
-    if (wordSet.has(currWord.toLowerCase())) {
-      console.log("Found");
-      setCurrAttempt({ attempt: currAttempt.attempt + 1, letter: 0 });
-    } else {
-      console.log("Word not found");
-      console.log([...wordSet][1]);
+    if (currWord.toUpperCase() === correctWord.toUpperCase()) {
+      setCurrAttempt({ attempt: currAttempt.attempt + 1, letterPos: 0 });
+      setGameOver({ gameOver: true, guessedWord: true });
+      return;
     }
 
-    //const newBoard = [...board];
-    //newBoard[0][currAttempt + 1];
-    //setBoard(newBoard);
+    if (currAttempt.attempt === 5) {
+      setGameOver({ gameOver: true, guessWord: false });
+    }
+
+    if (wordSet.has(currWord.toLowerCase())) {
+      setCurrAttempt({ attempt: currAttempt.attempt + 1, letterPos: 0 });
+    } else {
+      console.log("Word not found");
+    }
   };
 
   const onDelete = () => {
@@ -76,10 +86,14 @@ function App() {
             onEnter,
             onSelectLetter,
             correctWord,
+            disabledLetters,
+            setDisabledLetters,
+            gameOver,
+            setGameOver,
           }}
         >
           <Board />
-          <Keyboard />
+          {gameOver.gameOver ? <GameOver /> : <Keyboard />}
         </AppContext.Provider>
       </div>
     </div>
